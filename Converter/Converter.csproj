@@ -106,9 +106,6 @@
       <DependentUpon>ViewFailureDialog.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="App.config" />
-    <None Include="connectionStrings.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DbAccess\DbAccess.csproj">

@@ -20,7 +20,7 @@ namespace Converter
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(params string[] args)
         {
             BasicConfigurator.Configure();
 
@@ -32,7 +32,7 @@ namespace Converter
                 {
                   Console.WriteLine("Exporting database");
 
-                  RunConversion();
+                  RunConversion(string.Join(" ", args));
                 }
                 catch (Exception e)
                 {
@@ -56,9 +56,9 @@ namespace Converter
             }
         }
 
-      private static void RunConversion()
+      private static void RunConversion(string sqlConnString)
       {
-        var sqlConnString = Configuration.SqlServer;
+        if (string.IsNullOrEmpty(sqlConnString)) sqlConnString = Configuration.SqlServer;
         var sqlitePath = Configuration.Sqlite;
         var password = Configuration.Password;
         var generateTriggers = Configuration.ExportTriggers;
