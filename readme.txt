@@ -1,4 +1,5 @@
 
+Disclaimer: I'm not the author of the original code nor this readme
 Original source: http://www.codeproject.com/Articles/26932/Convert-SQL-Server-DB-to-SQLite-DB
 
 
