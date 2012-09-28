@@ -55,28 +55,36 @@ namespace DbAccess
             string sqlitePath, string password, SqlConversionHandler handler,
             SqlTableSelectionHandler selectionHandler,
             FailedViewDefinitionHandler viewFailureHandler,
-            bool createTriggers)
+            bool createTriggers, bool useThread = true)
         {
             // Clear cancelled flag
             _cancelled = false;
 
-            WaitCallback wc = new WaitCallback(delegate(object state)
-            {
-                try
-                {
-                    _isActive = true;
-                    ConvertSqlServerDatabaseToSQLiteFile(sqlServerConnString, sqlitePath, password, handler, selectionHandler, viewFailureHandler, createTriggers);
-                    _isActive = false;
-                    handler(true, true, 100, "Finished converting database");
-                }
-                catch (Exception ex)
-                {
-                    _log.Error("Failed to convert SQL Server database to SQLite database", ex);
-                    _isActive = false;
-                    handler(true, false, 100, ex.Message);
-                } // catch
-            });
-            ThreadPool.QueueUserWorkItem(wc);
+          WaitCallback convert = delegate(object state)
+                                        {
+                                          try
+                                          {
+                                            _isActive = true;
+                                            ConvertSqlServerDatabaseToSQLiteFile(sqlServerConnString, sqlitePath, password, handler, selectionHandler, viewFailureHandler, createTriggers);
+                                            _isActive = false;
+                                            handler(true, true, 100, "Finished converting database");
+                                          }
+                                          catch (Exception ex)
+                                          {
+                                            _log.Error("Failed to convert SQL Server database to SQLite database", ex);
+                                            _isActive = false;
+                                            handler(true, false, 100, ex.Message);
+                                          } // catch
+                                        };
+
+          if (useThread)
+          {
+            ThreadPool.QueueUserWorkItem(convert);
+          }
+          else
+          {
+            convert(new{});
+          }
         }
         #endregion
 
@@ -1256,7 +1264,7 @@ namespace DbAccess
         {
             SQLiteConnectionStringBuilder builder = new SQLiteConnectionStringBuilder();
             builder.DataSource = sqlitePath;
-            if (password != null)
+            if (string.IsNullOrEmpty(password) == false)
                 builder.Password = password;
             builder.PageSize = 4096;
             builder.UseUTF16Encoding = true;
